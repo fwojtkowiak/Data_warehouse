@@ -1,0 +1,70 @@
+﻿<?xml version="1.0"?>
+<DTS:Executable xmlns:DTS="www.microsoft.com/SqlServer/Dts"
+  DTS:refId="Package"
+  DTS:CreationDate="3/9/2018 8:44:55 AM"
+  DTS:CreationName="Microsoft.Package"
+  DTS:CreatorComputerName="PL-88V7JC2"
+  DTS:CreatorName="GROUPINFRA\filip.wojtkowiak"
+  DTS:DTSID="{72A653A4-78BE-485C-8585-AC140753D921}"
+  DTS:ExecutableType="Microsoft.Package"
+  DTS:LastModifiedProductVersion="14.0.3002.92"
+  DTS:LocaleID="1045"
+  DTS:ObjectName="dim_Dates"
+  DTS:PackageType="5"
+  DTS:VersionBuild="4"
+  DTS:VersionGUID="{BDDEC4DC-C6F7-44D8-AC89-8111716F8B2D}">
+  <DTS:Property
+    DTS:Name="PackageFormatVersion">8</DTS:Property>
+  <DTS:ConnectionManagers>
+    <DTS:ConnectionManager
+      DTS:refId="Package.ConnectionManagers[PL-88V7JC2\SQLEXPRESS.data_warehouse]"
+      DTS:CreationName="OLEDB"
+      DTS:DTSID="{8B9E6E9F-31D2-4667-BBA9-C52106FE08EA}"
+      DTS:ObjectName="PL-88V7JC2\SQLEXPRESS.data_warehouse">
+      <DTS:ObjectData>
+        <DTS:ConnectionManager
+          DTS:ConnectionString="Data Source=PL-88V7JC2\SQLEXPRESS;Initial Catalog=data_warehouse;Provider=SQLNCLI11.1;Integrated Security=SSPI;Auto Translate=False;" />
+      </DTS:ObjectData>
+    </DTS:ConnectionManager>
+  </DTS:ConnectionManagers>
+  <DTS:Variables />
+  <DTS:Executables>
+    <DTS:Executable
+      DTS:refId="Package\Import Dates"
+      DTS:CreationName="Microsoft.ExecuteSQLTask"
+      DTS:Description="Execute SQL Task"
+      DTS:DTSID="{CB594B02-16B0-48F4-A36B-9C7A756413DD}"
+      DTS:ExecutableType="Microsoft.ExecuteSQLTask"
+      DTS:LocaleID="-1"
+      DTS:ObjectName="Import Dates"
+      DTS:TaskContact="Execute SQL Task; Microsoft Corporation; SQL Server 2017 RC1; © 2017 Microsoft Corporation; All Rights Reserved;http://www.microsoft.com/sql/support/default.asp;1"
+      DTS:ThreadHint="0">
+      <DTS:Variables />
+      <DTS:ObjectData>
+        <SQLTask:SqlTaskData
+          SQLTask:Connection="{8B9E6E9F-31D2-4667-BBA9-C52106FE08EA}"
+          SQLTask:SqlStatementSource="&#xA;DECLARE @StartDate date = '19500101' DECLARE @EndDate date = '20250101' ;&#xA;&#xA;WITH DatesTable AS&#xA;  ( SELECT CAST(@StartDate AS date) AS [date],&#xA;           year(@StartDate) [year],&#xA;           MONTH(@StartDate) [month],&#xA;           DAY(@StartDate) [day],&#xA;           DATEpart(dw,@StartDate) dw ,&#xA;           DATEpart(dy,@StartDate) dy ,&#xA;           DATEpart(wk,@StartDate) wy ,&#xA;           DATEpart(q,@StartDate) qy ,&#xA;           datename(MONTH,@StartDate) Mname ,&#xA;           datename(dw,@StartDate) Dname ,&#xA;           0 endm ,&#xA;           CAST(@StartDate AS datetime) StartDay ,&#xA;           dateadd(s,-1,dateadd(dd,1,CAST(@StartDate AS datetime))) EndDay ,&#xA;           cast(CAST(@StartDate AS datetime) AS float) dfloat ,&#xA;          YEAR(CAST(@StartDate AS date))*10000+MONTH(CAST(@StartDate AS date))*100+DAY(CAST(@StartDate AS date)) dint&#xA;   UNION ALL SELECT DATEADD(dd, 1, [date]),&#xA;                    year(DATEADD(dd, 1, [date])) YEAR,&#xA;                                                 MONTH(DATEADD(dd, 1, [date])) MONTH,&#xA;                                                                               DAY(DATEADD(dd, 1, [date])) DAY,&#xA;                                                                                                           DATEpart(dw,DATEADD(dd, 1, [date])) dateofweek ,&#xA;                                                                                                           DATEpart(dy,DATEADD(dd, 1, [date])) dateofyear ,&#xA;                                                                                                           DATEpart(wk,DATEADD(dd, 1, [date])) weekofyear ,&#xA;                                                                                                           DATEpart(q,DATEADD(dd, 1, [date])) quarterofyear ,&#xA;                                                                                                           datename(MONTH,DATEADD(dd, 1, [date])) Mname ,&#xA;                                                                                                           datename(dw,DATEADD(dd, 1, [date])) Dname ,&#xA;                                                                                                           CASE&#xA;                                                                                                               WHEN CAST(DATEADD(dd, 1, [date]) AS date) = cast(dateadd(s,-1,dateadd(MONTH,1,(CONVERT(datetime,'01-'+right('0'+convert(char(2),MONTH(DATEADD(dd, 1, [date]))),2)+'-'+convert(char(4),YEAR(DATEADD(dd, 1, [date]))),0)))) AS date) THEN 1&#xA;                                                                                                               ELSE 0&#xA;                                                                                                           END endm ,&#xA;                                                                                                           CAST(@StartDate AS datetime) StartDay ,&#xA;                                                                                                           dateadd(s,-1,dateadd(dd,1,DATEADD(dd, 1, cast([date] AS datetime)))) EndDay ,&#xA;                                                                                                           cast(CAST(DATEADD(dd, 1, [date]) AS datetime) AS float) dfloat ,&#xA;                                                                                                           YEAR(DATEADD(dd, 1, [date]))*10000+MONTH(DATEADD(dd, 1, [date]))*100+DAY(DATEADD(dd, 1, [date]))  dint&#xA;   FROM DatesTable&#xA;   WHERE DATEADD(dd, 1, [date]) &lt;= @EndDate )&#xA;INSERT INTO [dbo].[dim_dates] ([Date_bk] ,[Date] ,[Day] ,[Day_Of_Week] ,[Day_Of_Year] ,[Week_Of_Year] ,[Week_Of_Month] ,[Month] ,[Month_Name] ,[Quarter] ,[Year])&#xA;SELECT cast(dint as nvarchar(8)) AS [Date_bk] ,&#xA;       [Date] ,&#xA;       [Day] ,&#xA;       dw AS [Day_Of_Week] ,&#xA;       dy AS [Day_Of_Year] ,&#xA;       wy AS [Week_Of_Year] ,&#xA;       wy AS[Week_Of_Month] ,&#xA;       [Month] ,&#xA;       Mname AS [Month_Name] ,&#xA;       qy AS [Quarter] ,&#xA;       [Year]&#xA;FROM DatesTable OPTION (MAXRECURSION 0);&#xA;" xmlns:SQLTask="www.microsoft.com/sqlserver/dts/tasks/sqltask" />
+      </DTS:ObjectData>
+    </DTS:Executable>
+  </DTS:Executables>
+  <DTS:DesignTimeProperties><![CDATA[<?xml version="1.0"?>
+<!--This CDATA section contains the layout information of the package. The section includes information such as (x,y) coordinates, width, and height.-->
+<!--If you manually edit this section and make a mistake, you can delete it. -->
+<!--The package will still be able to load normally but the previous layout information will be lost and the designer will automatically re-arrange the elements on the design surface.-->
+<Objects
+  Version="8">
+  <!--Each node below will contain properties that do not affect runtime behavior.-->
+  <Package
+    design-time-name="Package">
+    <LayoutInfo>
+      <GraphLayout
+        Capacity="4" xmlns="clr-namespace:Microsoft.SqlServer.IntegrationServices.Designer.Model.Serialization;assembly=Microsoft.SqlServer.IntegrationServices.Graph">
+        <NodeLayout
+          Size="141,42"
+          Id="Package\Import Dates"
+          TopLeft="425.5,165.5" />
+      </GraphLayout>
+    </LayoutInfo>
+  </Package>
+</Objects>]]></DTS:DesignTimeProperties>
+</DTS:Executable>
